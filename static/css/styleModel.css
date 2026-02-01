@@ -1,0 +1,599 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #F5F5F5;
+  margin: 20px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.btnBack{
+  width: 533px;
+  height: 84px;
+  color: #FDFEFE;
+  background-color: #4f694b;
+  border-radius: 18px;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center; 
+  cursor: pointer;
+  padding-left: 30px;
+  padding-right: 30px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.btnBack:hover {
+  background-color: #5a6e57;
+}
+
+
+a{
+  text-decoration: none;
+  color: #FDFEFE;
+  font-size: 20px;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  float: right;
+  justify-content: center;
+}
+
+
+/* blockOne */
+
+.blockOne{
+  width: 626px;
+  height: 634px;
+  background-color: #FDFEFE;
+  padding: 30px;
+  border: none;
+  border-radius: 18px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+select#datasets{
+  border-radius: 8px;
+  border-color: #9091967a;
+  background-color: #F5F5F5;
+  font-size: 16px;
+  padding: 16px 0 16px 16px;  
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+select#datasets :focus{
+  border-color: blue;
+  outline: none;
+}
+
+select#datasets ::placeholder{
+  color: #aaa; 
+  opacity: 1;
+}
+
+input.parOne{
+  border-radius: 8px;
+  border: none;
+  width: 610px;
+  background-color: #F5F5F5;
+  font-size: 16px;
+  padding: 16px 0 16px 16px;  
+  color: #36373b;
+}
+
+
+input.parOne::placeholder {
+  color: #aaa; 
+  opacity: 1;
+}
+
+/* ЦВЕТ ОБВОДКИ ПРИ НАЖАТИИ ПОДУМАТЬ!! */
+input.parOne:focus{
+  border-color: blue;
+  outline: none;
+}
+
+
+.btnStartTrain{
+  width: 100%;
+  height: 75px;
+  border: none;
+  border-radius: 8px;
+  background-color: #4f694b;
+  cursor: pointer;
+  color: #F5F5F5;
+  font-size: 20px;
+}
+
+.btnStartTrain:hover {
+  background-color: #5a6e57;
+}
+
+
+
+
+/* blockTwo */
+
+.blockTwo{
+  width: 473px;
+  height: 816px;
+  background-color: #FDFEFE;
+  padding: 30px;
+  border: none;
+  border-radius: 18px;
+}
+
+input.parTwo{
+  border-radius: 8px;
+  border: none;
+  width: 457px;
+  background-color: #F5F5F5;
+  font-size: 16px;
+  padding: 16px 0 16px 16px;  
+  color: #36373b;
+  margin-bottom:16px;
+}
+
+input.parTwo::placeholder {
+  color: #aaa; 
+  opacity: 1;
+}
+
+/* ЦВЕТ ОБВОДКИ ПРИ НАЖАТИИ ПОДУМАТЬ!! */
+input.parTwo:focus{
+  border-color: blue;
+  outline: none;
+}
+
+
+
+.btnAddDataSet{
+  width: 100%;
+  height: 75px;
+  border: none;
+  border-radius: 8px;
+  background-color: #4f694b;
+  cursor: pointer;
+  color: #F5F5F5;
+  font-size: 16px;
+}
+
+.btnAddDataSet:hover {
+  background-color: #5a6e57;
+}
+
+
+
+
+/* список файлов во втором блоке */
+
+.listFiles{
+  width: 473px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  min-height: 80px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  overflow-y: auto;
+  max-height: 370px; 
+
+}
+
+.btnDownload{
+  width: 380px;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  background-color: #4f694b;
+  cursor: pointer;
+  color: #F5F5F5;
+  font-size: 16px;
+}
+
+.btnDownload:hover {
+  background-color: #5a6e57;
+}
+
+
+.addPhoto{
+  display: flex;
+  justify-content: space-between;
+}
+
+
+input.parTwoPhoto{
+  border-radius: 8px;
+  border: none;
+  width: 100%;
+  background-color: #F5F5F5;
+  font-size: 16px;
+  padding: 16px 0 16px 16px;  
+  color: #36373b;
+  margin-bottom:16px;
+  margin-right: 4px;
+}
+
+input.parTwoPhoto::placeholder {
+  color: #aaa; 
+  opacity: 1;
+}
+
+/* ЦВЕТ ОБВОДКИ ПРИ НАЖАТИИ ПОДУМАТЬ!! */
+input.parTwoPhoto:focus{
+  border-color: blue;
+  outline: none;
+}
+
+
+
+
+/* BlockAddClass */
+
+.BlockAddClass{
+  width: 626px;
+  height: 204px;
+  background-color: #FDFEFE;
+  padding: 30px;
+  border: none;
+  border-radius: 18px;
+}
+
+
+.btnAddClass{
+  width: 193px;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  background-color: #4f694b;
+  cursor: pointer;
+  color: #F5F5F5;
+  font-size: 16px;
+}
+
+.btnAddClass:hover {
+  background-color: #5a6e57;
+}
+
+
+input.parTwoClass{
+  border-radius: 8px;
+  border: none;
+  width: 410px;
+  background-color: #F5F5F5;
+  font-size: 16px;
+  padding: 16px 0 16px 16px;  
+  color: #36373b;
+}
+
+input.parTwoClass::placeholder {
+  color: #aaa; 
+  opacity: 1;
+}
+
+/* ЦВЕТ ОБВОДКИ ПРИ НАЖАТИИ ПОДУМАТЬ!! */
+input.parTwoClass:focus{
+  border-color: blue;
+  outline: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.overlayForCD {
+  display: none; /* Скрыто по умолчанию */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.CreateDataSet {
+  display: none; /* Скрыто по умолчанию */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  width: 400px;
+  padding: 20px;
+}
+
+.show {
+  display: block; /* Показываем попап и затемнение */
+}
+
+
+h1 {
+    color: #333;
+    text-align: center;
+}
+
+.inputsval1 {
+    margin-bottom: 20px;
+}
+
+.inputsval {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.inputsval input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.viewFiles {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+
+
+.fileList {
+    font-weight: bold;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.thatFile {
+    width: 45%;
+    text-align: center;
+}
+
+.thatFile img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.blocTwo {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
+
+.VerhLoadingScreen {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-x {
+  border: none;
+  text-decoration: none;
+  background-color: #FDFEFE;
+  cursor: pointer;
+}
+
+form {
+    margin-top: 20px;
+}
+
+
+
+button {
+    padding: 10px 15px;
+    background-color: #4f694b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #5a6e57;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+
+
+
+
+
+
+
+  
+  
+  
+  /* Экран загрузки */
+  .LoadingScreen {
+    position: fixed;
+    background-color: #FDFEFE;
+    border: none;
+    display: none;
+    width: 781px;
+    /* height: 433px; */
+              
+  
+    
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+    z-index: 9999;
+    
+    
+    padding: 40px;
+    border-radius: 18px;
+    /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); */
+    
+  
+  
+      
+      /* width:100%;
+      min-height:100%;
+      background-color: rgba(0,0,0,0.5);
+      overflow:hidden;
+      position:fixed;
+      top:0px; */
+      
+  }
+  
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.738); /* Затемнение с прозрачностью 70% */
+    display: none; /* Скрываем по умолчанию */
+    z-index: 999; /* Устанавливаем на передний план */
+  }
+  
+  .show {
+    display: block; /* Показываем попап и затемнение */
+  }
+  
+  
+  .VerhLoadingScreen{
+    display: flex;
+    justify-content: space-between;
+   
+  }
+  
+  h3{
+    padding: 0;
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  .close-x{
+    border: none;
+    text-decoration: none;
+    background-color: #FDFEFE;
+    cursor: pointer;
+  }
+  
+  
+  .file{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 300px;
+  }
+  
+  #uploadForm{
+    display: flex;
+    justify-content: center;
+  }
+  
+
+  
+  
+  
+  
+    /* Делаем наше поле ввода файла невидимым */
+  .custom-file-input {
+      opacity: 0;
+      width: 0.1px;
+      height: 0.1px;
+      z-index: -1; /* "Скрываем" поле ввода */
+  }
+  
+  /* Создаем "подмену" кнопки */
+  .file-btn {
+    background-color: #b4b7c5;
+    color: #FDFEFE;
+      
+    border-radius: 18px;
+    /* cursor: pointer; */
+    display: inline-block;
+  
+    width: 230px;
+    height: 56px;
+    
+    border: none;
+    text-decoration: none;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 24px;  
+  
+  }
+  
+  .file-btn:hover{
+    background-color:#5a6e57;
+  }
+  
+  
+  button.downloadBtn2{
+    background-color: #4f694b;
+    color: #FDFEFE;
+    border-radius: 18px;
+    /* cursor: pointer; */
+    display: inline-block;
+  
+    width: 230px;
+    height: 56px;
+    
+    border: none;
+    text-decoration: none;
+    font-size: 16px;
+    /* display: flex; */
+    align-items: center;
+    justify-content: center;
+   
+  }
+  
+  .downloadBtn2:hover{
+    background-color: #5a6e57;
+  }

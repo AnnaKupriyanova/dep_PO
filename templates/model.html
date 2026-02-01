@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleModel.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <title>Модель</title>
+</head>
+<body>
+  
+
+    
+    
+
+    <!-- <div class="blocOne">
+
+            <main>
+
+            <button onclick="openLoadingScreen()" class="btnDownload"> Загрузить</button>
+
+            <div class="overlay" onclick="closeLoadingScreen()"></div>
+            <div class="LoadingScreen">
+                <div class="VerhLoadingScreen">
+                    <h3>Загрузка файлов</h3>
+                    <button class="close-x" onclick="closeLoadingScreen()"></button>
+                </div>
+            
+                <div class="listFiles">
+                    <span class="file" id="file-label"></span>
+                </div>
+
+                <form id="uploadForm" action="{{ url_for('upload_model_files') }}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+                    <label class="file-btn" for="showUploadForm">Выбрать файлы</label>
+                    
+                    <input id="showUploadForm" name="files" multiple class="custom-file-input" type="file" accept=".jpg, .jpeg, .png, .txt" onchange="updateFileLabel(this.files)" style="display: none;">
+                    
+                    <button class="downloadBtn2" type="submit">Загрузить</button>
+                </form>
+            </div>
+
+            <div class="inputsval1">
+                <label class="inputsval">
+                    <input type="checkbox" id="showAnnotated" value="txt" onchange="filterFiles()">
+                    Только с разметкой
+                </label>
+            </div>
+
+
+            <div class="viewFiles">
+                <div class="listFiles">
+                    <label class="fileList" for="file">Список файлов</label>
+                    <select size="20" id="fruits" name="fruits" onchange="updateImage()">
+                        {% for photo in photos %}
+                            <option value="{{ photo.photo }}" data-txt="{{ photo.txt }}">{{ filenames[loop.index0] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="thatFile">
+                    Файл: <span id="selectedFileName"></span><br>
+                    <img id="fileImage" src="" width="400" height="400"><br>
+                </div>
+            </div>
+            </main>
+
+
+    </div> -->
+   
+
+
+    
+
+
+
+
+    <div class="left">
+    <!-- Обучение модели -->
+    <div class="blockOne">
+        <h2> Обучение модели</h2>
+
+        <form action="{{ url_for('train') }}" method="POST">
+            <label for="datasets">Варианты датасетов</label>
+            <select id="datasets" name="selected_dataset" required>
+                {% for dataset in datasets %}
+                    {% set dataset_name = dataset.dataset.split('\\')[-1] %}
+                    <option value="{{ dataset.dataset }}">{{ dataset_name }}</option>
+                {% endfor %}
+            </select><br>
+
+            <p>Параметры</p>
+            <div class="form-group">
+                <input class="parOne" type="text" id="model_name" placeholder="Название модели" name="model_name" value="" required>
+            </div>
+            <div class="form-group">
+              
+                <input class="parOne" type="number" id="imgsz" placeholder="Размер изображения" name="imgsz" value="" required>
+            </div>
+            <div class="form-group">
+          
+                <input class="parOne" type="number" id="epochs" placeholder="Количество эпох" name="epochs" value="" required>
+            </div>
+            <div class="form-group">
+                <input class="parOne" type="number" id="batch" placeholder="Размер батча" name="batch" value="" required>
+            </div>
+            <div class="form-group">
+                <input class="parOne" type="number" id="save_period" placeholder="Период сохранения" name="save_period" value="" required>
+            </div>
+
+            <button class="btnStartTrain" type="submit">Запустить обучение</button>
+        </form>
+
+    </div>
+
+    <div class="BlockAddClass">
+        <h2>Создание класса</h2>
+
+        <form action="{{ url_for('create_class') }}" method="POST">
+            <select id="datasets" name="selected_dataset" required>
+                
+                {% for dataset in datasets %}
+                    {% set dataset_name = dataset.dataset.split('\\')[-1] %}
+                    <option value="{{ dataset.dataset }}">{{ dataset_name }}</option>
+                {% endfor %}
+            </select>
+  
+            
+            <input class="parTwoClass" type="text" id="class_name" placeholder="Название класса" name="class_name" required>
+            
+            <button class="btnAddClass" type="submit">Создать класс</button>
+        </form>
+      
+    </div>
+
+
+
+    </div>
+
+    <div class="right">
+        <button class="btnBack"><a href="{{ url_for('index') }}">Вернуться в галерею  </a></button>
+
+
+    <!-- Создание датасета -->
+        <div class="blockTwo">
+            <h2>Создание нового датасета</h2>
+
+            <div class="listFiles">
+                <label class="fileList" for="file">Список файлов</label>
+                        <div class="inputsval1">
+                            <label class="inputsval">
+                                <input type="checkbox" id="showAnnotated" value="txt" onchange="filterFiles()">
+                                Только с разметкой
+                            </label>
+                        </div>
+
+                        
+                        <select size="20" id="fruits" name="fruits" onchange="updateImage()">
+                            {% for photo in photos %}
+                                <option value="{{ photo.photo }}" data-txt="{{ photo.txt }}">{{ filenames[loop.index0] }}</option>
+                            {% endfor %}
+                        </select>
+                    
+            </div>
+
+            <div class="overlay" onclick="closeLoadingScreen()"></div>
+            <div class="LoadingScreen">
+                <div class="VerhLoadingScreen">
+                    <h3>Загрузка файлов</h3>
+                    <button class="close-x" onclick="closeLoadingScreen()"></button>
+                </div>
+            
+                <div class="listFiles">
+                    <span class="file" id="file-label"></span>
+                </div>
+
+                <form id="uploadForm" action="{{ url_for('upload_model_files') }}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+                    <label class="file-btn" for="showUploadForm">Выбрать файлы</label>
+                    
+                    <input id="showUploadForm" name="files" multiple class="custom-file-input" type="file" accept=".jpg, .jpeg, .png, .txt" onchange="updateFileLabel(this.files)" style="display: none;">
+                    
+                    <button class="downloadBtn2" type="submit">Загрузить</button>
+                </form>
+            </div>
+
+
+            <form id="photoForm" action="/copy_photos" method="post">
+                <div class="addPhoto">
+                    <input class="parTwoPhoto" type="number" id="numPhotos" placeholder="Количество фотографий" name="num_photos" min="1" max="{{ non_empty_count }}" value="{{ non_empty_count }}" required>
+                    <button onclick="openLoadingScreen()" class="btnDownload"> Загрузить фотографии</button>
+                </div>
+                
+                
+                
+                
+                <input class="parTwo" type="text" id="datasetName" name="dataset_name" required placeholder="Название датасета"><br>
+            
+                
+                <input class="parTwo"  type="number" id="trainSize" name="train_size" min="0" max="1" step="0.01" value="" required placeholder="Размер train выборки"><br>
+            
+            
+                <input class="parTwo"  type="number" id="valSize" name="val_size" min="0" max="1" step="0.01" value="" required placeholder="Размер val выборки"><br>
+            
+
+                
+
+                
+
+                <button class="btnAddDataSet" type="submit">Сохранить датасет</button>
+            </form>
+
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+   
+    <!-- <div class="blocTwo">
+        <h1>Блок создание выборки для обучения</h1>
+
+
+        <button onclick="openCreateDataSet()" class="">Создать датасет </button>
+
+        <div class="overlayForCD" onclick="closeCreateDataSet()"></div>
+        <div class="CreateDataSet">
+            <div class="VerhLoadingScreen">
+                <h3>Создать новый датасет</h3>
+                <button class="close-x" onclick="closeCreateDataSet()"><img src="{{ url_for('static', filename='img/close-x.svg') }}" alt=""></button>
+            </div>
+
+                <form id="photoForm" action="/copy_photos" method="post">
+                    <label for="numPhotos">Количество фотографий:</label>
+                    <input type="number" id="numPhotos" name="num_photos" min="1" max="{{ non_empty_count }}" value="{{ non_empty_count }}" required><br>
+                    
+                    <label for="datasetName">Название датасета:</label>
+                    <input type="text" id="datasetName" name="dataset_name" required placeholder="Введите название"><br>
+                
+                    <label for="trainSize">Размер train выборки (0-1):</label>
+                    <input type="number" id="trainSize" name="train_size" min="0" max="1" step="0.01" value="0.8" required placeholder="Например, 0.8"><br>
+                
+                    <label for="valSize">Размер val выборки (0-1):</label>
+                    <input type="number" id="valSize" name="val_size" min="0" max="1" step="0.01" value="0.2" required placeholder="Например, 0.2"><br>
+                
+                    <button type="submit">Сохранить датасет</button>
+                </form><br>
+
+        </div><br><br>
+
+        <form action="{{ url_for('create_class') }}" method="POST">
+            <label for="datasets">Выберите датасет:</label>
+            <select id="datasets" name="selected_dataset" required>
+                {% for dataset in datasets %}
+                    {% set dataset_name = dataset.dataset.split('\\')[-1] %}
+                    <option value="{{ dataset.dataset }}">{{ dataset_name }}</option>
+                {% endfor %}
+            </select><br>
+            
+            <label for="class_name">Введите имя класса:</label>
+            <input type="text" id="class_name" name="class_name" required>
+            
+            <button type="submit">Создать класс</button>
+        </form><br>
+
+        
+    </div> -->
+
+</body>
+</html>

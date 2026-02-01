@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <title>Питомник</title>
+</head>
+<body>
+    <header>
+        <img class="Logo" src="{{ url_for('static', filename='img/Logo.svg') }}" alt="">
+        <menu>
+            <img class="notification" src="{{ url_for('static', filename='img/notification.svg') }}" alt="">
+            <img class="profile" src="{{ url_for('static', filename='img/person men.png') }}" alt="">
+        </menu>
+    </header>
+
+    <main>
+
+        <nav>
+            <button class="model"><a href="{{ url_for('model') }}"> <img class="imgModel" src="{{ url_for('static', filename='img/model.svg') }}" alt=""></a></button>
+
+            <button class="linkStelaz">
+                Перейти к стеллажам <img class="imgStelaz" src="{{ url_for('static', filename='img/export.svg') }}" alt="">
+            </button>
+            
+            <button onclick="openLoadingScreen()" class="btnDownload">
+                Загрузить материал <img class="imgDown" src="{{ url_for('static', filename='img/download.svg') }}" alt="">
+            </button>
+        </nav>
+
+        
+
+        <div class="overlay" onclick="closeLoadingScreen()"></div>
+        <div class="LoadingScreen">
+            <div class="VerhLoadingScreen">
+                <h3>Загрузка файлов</h3>
+                <button class="close-x" onclick="closeLoadingScreen()">
+                   <img src="{{ url_for('static', filename='img/close-x.svg') }}" alt="">
+                </button>
+            </div>
+          
+            <div class="listFiles">
+                <span class="file" id="file-label"></span>
+            </div>
+            
+            <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+                <!-- <label for="modelSelect">Выберите модель:</label>
+                <select id="modelSelect" name="selected_model" required>
+                    {% for model in models %}
+                        {% set model_name = model.model.split('\\')[-1] %}
+                        <option value="{{ model.id }}">{{ model.model_name }}</option>
+                    {% endfor %}
+                </select> -->
+
+                <label class="file-btn" for="showUploadForm">Выбрать файлы</label>
+                
+                <button class="downloadBtn2" type="submit">Загрузить</button>
+                <input id="showUploadForm" name="files" multiple class="custom-file-input" type="file" accept=".mp4, .mov, .avi, .jpg, .jpeg, .png" onchange="updateFileLabel(this.files)">
+            </form>
+        </div>
+
+      <div class="container_gallery">
+            <h2>Галерея фотографий</h2>
+            <div class="gallery">
+                {% for photo in photos %}
+                    <div>
+                        <img src="{{ url_for('static', filename=photo.processed_photo) }}" alt="Processed Image" class="thumbnail" onclick="zoomImage(this.src, '{{ photo.id }}')">
+                        <h3 class="name">{{ photo.photo_date.strftime('%d %B %Y') }}</h3>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="zoomed" id="zoomedImage" onclick="closeZoom()" style="display: none;">
+            <img id="zoomedImg" src="" alt="Zoomed Image">
+            <div id="shelfInfo"></div>
+            <button id="deleteButton" onclick="deleteImage(event, '')">Удалить</button>
+        </div>
+    </main>
+
+    <!-- <footer>
+        <img class="Logo" src="{{ url_for('static', filename='img/Logo.svg') }}" alt="">
+        <p>@ 2024 Кемеровский Питомник</p>
+        <div class="contacts">
+            Контакты
+            г. Кемерово, Тухачевского ул., 40
+            info@svoy-pitomnik.ru
+        </div>
+    </footer>  -->
+   
+</body>
+</html>
