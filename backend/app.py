@@ -11,10 +11,13 @@ from ultralytics import YOLO
 import random
 from sqlalchemy import func, text
 from sklearn.model_selection import train_test_split
+import pymysql
 
 load_dotenv()
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+app = Flask(__name__,
+            static_folder='../frontend/static',    # путь к static
+            template_folder='../frontend/templates') # путь к templates
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 secret_key = os.urandom(24)
