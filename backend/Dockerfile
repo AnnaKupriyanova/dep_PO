@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Создание необходимых директорий
-RUN mkdir -p /app/uploads /app/datasets /app/runs
+RUN mkdir -p /app/uploads /app/datasets /app/runs /app/static /app/templates
 
 EXPOSE 5000
 

@@ -1,3 +1,5 @@
+
+DROP DATABASE trees;
 CREATE DATABASE trees;
 
 USE trees; 

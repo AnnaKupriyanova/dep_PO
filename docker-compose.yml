@@ -24,14 +24,14 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  app:
     build: ./backend
-    container_name: flask_backend
+    container_name: flask_app
     restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
-      DB_USER: root  # Используем root
+      DB_USER: root
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_NAME: ${DB_NAME}
@@ -43,26 +43,12 @@ services:
     networks:
       - app-network
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
+      - ./frontend/static:/app/static          # монтируем статику в /app/static
+      - ./frontend/templates:/app/templates    # монтируем шаблоны в /app/templates
       - ./uploads:/app/uploads
       - ./datasets:/app/datasets
       - ./runs:/app/runs
-
-  frontend:
-    build: ./frontend
-    container_name: html_frontend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      REACT_APP_API_URL: http://localhost:5000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    depends_on:
-      - backend
-    networks:
-      - app-network
 
 volumes:
   mysql_data:
