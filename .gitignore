@@ -1,1 +1,4 @@
 .env
+!migrations/versions/
+!migrations/versions/*.py
+!migrations/versions/README

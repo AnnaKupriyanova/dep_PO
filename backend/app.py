@@ -100,8 +100,17 @@ def upload_files():
     
     files = request.files.getlist('files')
     filenames = []
-    output_folder = os.path.join(os.path.dirname(__file__), "runs", "predict")
-    base_images_dir = os.path.join(os.path.dirname(__file__), "static", "base_images")
+
+   # Определяем базовые пути
+    backend_dir = os.path.dirname(os.path.abspath(__file__))  # backend/
+    project_root = os.path.dirname(backend_dir)               # project/
+    static_dir = os.path.join(project_root, 'frontend', 'static')  # project/frontend/static/
+    
+    # Путь для сохранения изображений (в static)
+    base_images_dir = os.path.join(static_dir, "base_images")
+    # Путь для временных файлов (runs в корне проекта)
+    output_folder = os.path.join(backend_dir, "runs", "predict")
+
     if not os.path.exists(base_images_dir):
         os.makedirs(base_images_dir)
 
@@ -118,7 +127,7 @@ def upload_files():
             filename = file.filename
             photo = os.path.join(base_images_dir, filename)
             file.save(photo)
-            relative_path = os.path.relpath(photo, start=os.path.join(os.path.dirname(__file__), "static")) 
+            relative_path = os.path.relpath(photo_path, start=static_dir)
             relative_path = relative_path.replace("\\", "/")
             file_creation_date = datetime.fromtimestamp(os.path.getctime(photo)) 
             new_photo = Photo(photo=relative_path, is_discovered=0, photo_date=file_creation_date, modul=0)
