@@ -63,16 +63,30 @@
             </form>
         </div>
 
-      <div class="container_gallery">
-            <h2>Галерея фотографий</h2>
-            <div class="gallery">
-                {% for photo in photos %}
-                    <div>
-                        <img src="{{ url_for('static', filename=photo.processed_photo) }}" alt="Processed Image" class="thumbnail" onclick="zoomImage(this.src, '{{ photo.id }}')">
-                        <h3 class="name">{{ photo.photo_date.strftime('%d %B %Y') }}</h3>
-                    </div>
-                {% endfor %}
-            </div>
+        <div class="container_gallery">
+            <h2>Галерея фотографий ({{ photos|length }} фото)</h2>
+            {% if photos %}
+                <div class="gallery">
+            {% for photo in photos %}
+                        <div>
+                            {% if photo.processed_photo %}
+                                <img src="{{ url_for('static', filename=photo.processed_photo) }}" 
+                                    alt="Processed Image" 
+                                    class="thumbnail" 
+                                    onclick="zoomImage(this.src, '{{ photo.id }}')">
+                                <h3 class="name">{{ photo.photo_date.strftime('%d %B %Y') }}</h3>
+                                <span class="badge">Обработано</span>
+                            {% else %}
+                                <div class="processing-placeholder">
+                                    <p>В обработке...</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Нет обработанных фотографий. Загрузите фото или видео для анализа.</p>
+            {% endif %}
         </div>
 
         <div class="zoomed" id="zoomedImage" onclick="closeZoom()" style="display: none;">
@@ -80,6 +94,15 @@
             <div id="shelfInfo"></div>
             <button id="deleteButton" onclick="deleteImage(event, '')">Удалить</button>
         </div>
+    
+        <div class="redis-stats">
+            <h4>Redis Service Discovery Stats</h4>
+            <div id="redisStats">
+                <div class="loading">Loading stats...</div>
+            </div>
+        </div>
+    
+    
     </main>
 
     <!-- <footer>

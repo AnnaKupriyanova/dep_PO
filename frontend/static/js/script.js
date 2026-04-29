@@ -270,3 +270,48 @@ function updateFileCount() {
 //     const path = folderHandle.name;
 //     document.getElementById('destinationFolder').value = path;
 // }
+
+
+
+// Получение статистики из Redis
+async function loadRedisStats() {
+    try {
+        const response = await fetch('/discovery/stats');
+        const stats = await response.json();
+        
+        const statsHtml = `
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${stats.total_services || 0}</div>
+                    <div class="stat-label">Total Services</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.healthy_services || 0}</div>
+                    <div class="stat-label">Healthy Services</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${Object.keys(stats.tag_statistics || {}).length}</div>
+                    <div class="stat-label">Unique Tags</div>
+                </div>
+            </div>
+            <div class="tag-cloud">
+                <strong>Tags:</strong>
+                ${Object.entries(stats.tag_statistics || {}).map(([tag, count]) => 
+                    `<span class="tag">${tag} (${count})</span>`
+                ).join(', ')}
+            </div>
+        `;
+        
+        document.getElementById('redisStats').innerHTML = statsHtml;
+    } catch (error) {
+        console.error('Error loading Redis stats:', error);
+        document.getElementById('redisStats').innerHTML = 
+            '<div class="error">Failed to load stats</div>';
+    }
+}
+
+// Вызываем загрузку статистики
+document.addEventListener('DOMContentLoaded', () => {
+    loadRedisStats();
+    setInterval(loadRedisStats, 30000);
+});

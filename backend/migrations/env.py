@@ -8,7 +8,7 @@ if backend_path not in sys.path:
     sys.path.append(backend_path)
 
 from app import app
-from models import db, Photo, Dataset, Model
+from models import db, Photo, Dataset, Model # type: ignore
 
 from logging.config import fileConfig
 from alembic import context

@@ -12,6 +12,11 @@ import random
 from sqlalchemy import func, text
 from sklearn.model_selection import train_test_split
 import pymysql
+import logging
+import traceback
+import threading
+import time
+import requests
 
 load_dotenv()
 app = Flask(__name__,
@@ -20,10 +25,33 @@ app = Flask(__name__,
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+app.config['DEBUG'] = True
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 secret_key = os.urandom(24)
 app.secret_key = secret_key
 
 db = SQLAlchemy(app)
+
+SERVICE_DISCOVERY_BACKEND = os.getenv('SERVICE_DISCOVERY_BACKEND', 'redis')
+
+if SERVICE_DISCOVERY_BACKEND == 'redis':
+    from redis_discovery import redis_bp as discovery_bp
+    logger.info("Using Redis for service discovery")
+else:
+    # Создаем mock blueprint
+    from flask import Blueprint
+    discovery_bp = Blueprint('discovery', __name__, url_prefix='/discovery')
+        
+    @discovery_bp.route('/register', methods=['POST'])
+    def register():
+         return jsonify({"status": "mock", "message": "Service discovery disabled"})
+
+# Регистрируем blueprint
+app.register_blueprint(discovery_bp)
 
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,126 +117,199 @@ def extract_frames(video_path, output_folder, frame_rate=10, db_session=None):
 
 @app.route('/')
 def index():
-    photos = Photo.query.filter_by(modul=0).order_by(Photo.id.desc()).all()
-    models = Model.query.all()
-    return render_template('index.html', photos=photos, models=models)
+    try:
+        photos = Photo.query.filter(
+            Photo.modul == 0,
+            Photo.processed_photo.isnot(None)
+        ).order_by(Photo.id.desc()).all()
+        
+        print(f"Displaying {len(photos)} processed photos")
+        
+        models = Model.query.all()
+        return render_template('index.html', photos=photos, models=models)
+    except Exception as e:
+        logger.error(f"Error in index: {str(e)}")
+        logger.error(traceback.format_exc())
+        return f"Error: {str(e)}", 500
 
 @app.route('/upload', methods=['POST'])
 def upload_files():
     if 'files' not in request.files:
         return "No file part", 400
     
-    files = request.files.getlist('files')
-    filenames = []
-
-   # Определяем базовые пути
-    backend_dir = os.path.dirname(os.path.abspath(__file__))  # backend/
-    project_root = os.path.dirname(backend_dir)               # project/
-    static_dir = os.path.join(project_root, 'frontend', 'static')  # project/frontend/static/
-    
-    # Путь для сохранения изображений (в static)
-    base_images_dir = os.path.join(static_dir, "base_images")
-    # Путь для временных файлов (runs в корне проекта)
-    output_folder = os.path.join(backend_dir, "runs", "predict")
-
-    if not os.path.exists(base_images_dir):
-        os.makedirs(base_images_dir)
-
-    for file in files:
-        if file.filename == '':
-            return "No selected file", 400
+    try:
+        files = request.files.getlist('files')
         
-        mime_type, _ = mimetypes.guess_type(file.filename)
-        if mime_type and mime_type.startswith('video/'):
-            video_path = os.path.join(base_images_dir, file.filename)
-            file.save(video_path)
-            extract_frames(video_path, output_folder, frame_rate=10, db_session=db.session)
-        else:
-            filename = file.filename
-            photo = os.path.join(base_images_dir, filename)
-            file.save(photo)
-            relative_path = os.path.relpath(photo_path, start=static_dir)
-            relative_path = relative_path.replace("\\", "/")
-            file_creation_date = datetime.fromtimestamp(os.path.getctime(photo)) 
-            new_photo = Photo(photo=relative_path, is_discovered=0, photo_date=file_creation_date, modul=0)
-            db.session.add(new_photo)
-            filenames.append(filename)
-
-    db.session.commit()
-    run_yolo_predictions()
-
-    return redirect(url_for('index'))
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(backend_dir)
+        static_dir = os.path.join(project_root, 'frontend', 'static')
+        
+        base_images_dir = os.path.join(static_dir, "base_images")
+        os.makedirs(base_images_dir, exist_ok=True)
+        
+        saved_count = 0
+        
+        for file in files:
+            if file.filename == '':
+                continue
+            
+            mime_type, _ = mimetypes.guess_type(file.filename)
+            if mime_type and mime_type.startswith('video/'):
+                video_path = os.path.join(base_images_dir, file.filename)
+                file.save(video_path)
+                # Для видео создаем output_folder в static
+                output_folder = os.path.join(static_dir, "video_frames")
+                extract_frames(video_path, output_folder, frame_rate=10, db_session=db.session)
+            else:
+                filename = file.filename
+                photo_path = os.path.join(base_images_dir, filename)
+                file.save(photo_path)
+                
+                relative_path = os.path.relpath(photo_path, static_dir)
+                relative_path = relative_path.replace("\\", "/")
+                
+                file_creation_date = datetime.fromtimestamp(os.path.getctime(photo_path))
+                new_photo = Photo(
+                    photo=relative_path, 
+                    is_discovered=0, 
+                    photo_date=file_creation_date, 
+                    modul=0,
+                    processed_photo=None  # Явно указываем, что не обработано
+                )
+                db.session.add(new_photo)
+                saved_count += 1
+        
+        db.session.commit()
+        print(f"Saved {saved_count} files to database")
+        
+        # Запускаем обработку
+        print("Starting YOLO predictions...")
+        run_yolo_predictions()
+        
+        return redirect(url_for('index'))
+    
+    except Exception as e:
+        logger.error(f"Error in upload: {str(e)}")
+        logger.error(traceback.format_exc())
+        db.session.rollback()
+        return f"Error: {str(e)}", 500
 
 def run_yolo_predictions():
-    model_path = os.path.join(os.path.dirname(__file__), "static", "best.pt")
-    model = YOLO(model_path)
-
-    predicted_folder = os.path.join(os.path.dirname(__file__), "runs", "predict")
-    os.makedirs(predicted_folder, exist_ok=True)
-
-    photos = Photo.query.filter(Photo.processed_photo.is_(None), Photo.modul == 0).all()
-    for photo in photos:
-        image_path = os.path.join(os.path.dirname(__file__), "static", photo.photo)
-        destination_path = os.path.join(predicted_folder, os.path.basename(photo.photo))
-
-        if os.path.exists(image_path):
-            if os.path.abspath(image_path) == os.path.abspath(destination_path):
-                print(f"Skipping copy for {image_path}, as it is the same file as {destination_path}.")
-            else:
-                try:
-                    shutil.copy(image_path, destination_path)
-                    print(f"Copied {image_path} to {destination_path}.")
-                except Exception as e:
-                    print(f"Failed to copy {image_path} to {destination_path}: {e}")
-        else:
-            print(f"Error: The image path {image_path} does not exist.")
-
-    results = model.predict(predicted_folder, save=True)
-    predicted_model_folder = os.path.join(os.path.dirname(__file__), "runs", "detect", "predict")
-    run = os.path.join(os.path.dirname(__file__), "runs")
-    destination_folder = os.path.join(os.path.dirname(__file__), "static", "images")
-    destination_base_folder = os.path.join(os.path.dirname(__file__), "static", "base_images")
-    os.makedirs(destination_folder, exist_ok=True)
-
-    for item in os.listdir(predicted_folder):
-        source = os.path.join(predicted_folder, item)
-        destination = os.path.join(destination_base_folder, item)
-        shutil.copy2(source, destination)
-
-    for item in os.listdir(predicted_model_folder):
-        source = os.path.join(predicted_model_folder, item)
-        destination = os.path.join(destination_folder, item)
-        shutil.copy2(source, destination)
-
-    for photo in photos:
-        processed_image_path = os.path.join(destination_folder, os.path.basename(photo.photo))
-            
-        if os.path.exists(processed_image_path):
-            damage_detected = False
+    try:
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(backend_dir)
+        static_dir = os.path.join(project_root, 'frontend', 'static')
+        
+        model_path = os.path.join(static_dir, "best.pt")
+        
+        if not os.path.exists(model_path):
+            print(f"Model not found at {model_path}")
+            return
+        
+        model = YOLO(model_path)
+        
+        # Берем фото без processed_photo (новые или необработанные)
+        photos = Photo.query.filter(
+            Photo.modul == 0,
+            Photo.processed_photo.is_(None)  # Только необработанные
+        ).all()
+        
+        if not photos:
+            print("No photos to process")
+            return
+        
+        print(f"Processing {len(photos)} photos...")
+        
+        # Создаем временную папку для предсказаний
+        temp_predict_folder = os.path.join(backend_dir, "temp_predict")
+        os.makedirs(temp_predict_folder, exist_ok=True)
+        
+        # Копируем фото во временную папку
+        for photo in photos:
+            source_path = os.path.join(static_dir, photo.photo)
+            if os.path.exists(source_path):
+                dest_path = os.path.join(temp_predict_folder, os.path.basename(photo.photo))
+                shutil.copy2(source_path, dest_path)
+                print(f"Copied: {os.path.basename(photo.photo)}")
+        
+        # Выполняем предсказание
+        results = model.predict(temp_predict_folder, save=True)
+        
+        # Папка с результатами YOLO
+        yolo_output_folder = os.path.join(backend_dir, "runs", "detect", "predict")
+        
+        # Папка для сохранения обработанных изображений
+        processed_images_dir = os.path.join(static_dir, "processed_images")
+        os.makedirs(processed_images_dir, exist_ok=True)
+        
+        # Обрабатываем результаты
+        for photo in photos:
+            # Ищем результат для текущего фото
+            result_for_photo = None
             for result in results:
-                if result.path == os.path.join(predicted_folder, os.path.basename(photo.photo)):
-                    if result.boxes is not None and len(result.boxes) > 0:
-                        for box in result.boxes:
-                            class_id = int(box.cls)
-                            is_discovered = result.names[class_id]
-                            if is_discovered == 'Empty':
-                                damage_detected = True
-                                break
-                    break 
-
-            if damage_detected:
-                photo.is_discovered = 1
-                relative_processed_path = os.path.relpath(processed_image_path, start=os.path.join(os.path.dirname(__file__), "static"))
-                relative_processed_path = relative_processed_path.replace("\\", "/")
-                photo.processed_photo = relative_processed_path
+                if os.path.basename(result.path) == os.path.basename(photo.photo):
+                    result_for_photo = result
+                    break
+            
+            if result_for_photo:
+                # Проверяем наличие повреждений
+                damage_detected = False
+                if result_for_photo.boxes is not None and len(result_for_photo.boxes) > 0:
+                    for box in result_for_photo.boxes:
+                        class_id = int(box.cls)
+                        label = result_for_photo.names[class_id]
+                        print(f"Detected: {label} in {photo.photo}")
+                        if label == 'Empty':  # Ваша метка для пустых/поврежденных мест
+                            damage_detected = True
+                            break
+                
+                if damage_detected:
+                    photo.is_discovered = 1
+                    
+                    # Копируем обработанное изображение
+                    yolo_output_path = os.path.join(yolo_output_folder, os.path.basename(photo.photo))
+                    if os.path.exists(yolo_output_path):
+                        dest_path = os.path.join(processed_images_dir, os.path.basename(photo.photo))
+                        shutil.copy2(yolo_output_path, dest_path)
+                        
+                        # Сохраняем относительный путь
+                        relative_processed = os.path.relpath(dest_path, static_dir)
+                        relative_processed = relative_processed.replace("\\", "/")
+                        photo.processed_photo = relative_processed
+                        print(f"Saved processed image: {relative_processed}")
+                    else:
+                        print(f"YOLO output not found: {yolo_output_path}")
+                else:
+                    photo.is_discovered = 0
+                    # Создаем запись что фото обработано, но повреждений нет
+                    # Можно скопировать оригинал как processed_photo или оставить None
+                    print(f"No damage detected in {photo.photo}")
+                    
+                    # Опционально: копируем оригинал как processed_photo
+                    source_path = os.path.join(static_dir, photo.photo)
+                    if os.path.exists(source_path):
+                        dest_path = os.path.join(processed_images_dir, f"no_damage_{os.path.basename(photo.photo)}")
+                        shutil.copy2(source_path, dest_path)
+                        relative_processed = os.path.relpath(dest_path, static_dir)
+                        relative_processed = relative_processed.replace("\\", "/")
+                        photo.processed_photo = relative_processed
             else:
-                photo.is_discovered = 0
-                db.session.delete(photo)
-
-            db.session.commit()
-
-    if os.path.exists(run):
-        shutil.rmtree(run)
+                print(f"No result found for {photo.photo}")
+        
+        db.session.commit()
+        
+        # Очищаем временные папки
+        if os.path.exists(temp_predict_folder):
+            shutil.rmtree(temp_predict_folder)
+        if os.path.exists(os.path.join(backend_dir, "runs")):
+            shutil.rmtree(os.path.join(backend_dir, "runs"))
+            
+        print("YOLO predictions completed successfully")
+        
+    except Exception as e:
+        print(f"Error in run_yolo_predictions: {str(e)}")
+        print(traceback.format_exc())
+        db.session.rollback()
 
 
 @app.route('/model')
@@ -546,6 +647,97 @@ def train():
         print(f'Ошибка при обучении: {e}', 'error')
     
     return redirect(url_for('model'))
+
+
+@app.route('/health')
+def health_check():
+    """Health check endpoint"""
+    try:
+        # Проверка БД
+        db.session.execute(text("SELECT 1"))
+        
+        # Проверка Redis если используется
+        redis_status = "not_configured"
+        if SERVICE_DISCOVERY_BACKEND == 'redis':
+            try:
+                import redis
+                r = redis.Redis(
+                    host=os.getenv('REDIS_HOST', 'redis'),
+                    port=int(os.getenv('REDIS_PORT', 6379)),
+                    decode_responses=True
+                )
+                r.ping()
+                redis_status = "connected"
+            except Exception as e:
+                redis_status = f"error: {str(e)}"
+        
+        return jsonify({
+            "status": "healthy",
+            "database": "connected",
+            "service_discovery": SERVICE_DISCOVERY_BACKEND,
+            "redis": redis_status,
+            "timestamp": datetime.now().isoformat()
+        }), 200
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return jsonify({
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
+
+def register_current_service():
+    """Автоматическая регистрация текущего сервиса"""
+    service_id = f"flask-backend-{os.getenv('HOSTNAME', 'default')}"
+    service_address = "app"  # Имя сервиса в Docker сети
+    service_port = 5000
+    
+    tags = ["api", "v1", "web", "analytics"]
+    
+    registration_data = {
+        "id": service_id,
+        "name": "analytics-service",
+        "address": service_address,
+        "port": service_port,
+        "tags": tags,
+        "metadata": {
+            "version": "1.0.0",
+            "framework": "flask",
+            "python_version": "3.11"
+        }
+    }
+    
+    try:
+        # Ждем запуска приложения
+        time.sleep(3)
+        
+        # Регистрируемся через внутренний эндпоинт
+        response = requests.post(
+            "http://localhost:5000/discovery/register",
+            json=registration_data,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            logger.info(f"Successfully registered with {SERVICE_DISCOVERY_BACKEND}: {service_id}")
+        else:
+            logger.error(f"Failed to register: {response.text}")
+            
+    except Exception as e:
+        logger.error(f"Error during service registration: {str(e)}")
+
+# ... (остальной код app.py без изменений) ...
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+        
+        # Регистрируем сервис в отдельном потоке
+        registration_thread = threading.Thread(target=register_current_service, daemon=True)
+        registration_thread.start()
+    
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
 
 if __name__ == '__main__':
     with app.app_context():
