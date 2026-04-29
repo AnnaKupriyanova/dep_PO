@@ -95,12 +95,19 @@
             <button id="deleteButton" onclick="deleteImage(event, '')">Удалить</button>
         </div>
     
-        <div class="redis-stats">
-            <h4>Redis Service Discovery Stats</h4>
-            <div id="redisStats">
-                <div class="loading">Loading stats...</div>
+        <!-- Блок со списком активных сервисов -->
+        <div class="services-section">
+            <div class="services-panel">
+                <div class="services-header">
+                    <h3>🔍 Активные сервисы</h3>
+                    <button class="refresh-btn" onclick="loadServices()">🔄 Обновить</button>
+                </div>
+                <div id="servicesList" class="services-list">
+                    <div class="loading-message">Загрузка...</div>
+                </div>
             </div>
         </div>
+
     
     
     </main>

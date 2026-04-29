@@ -315,3 +315,49 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRedisStats();
     setInterval(loadRedisStats, 30000);
 });
+
+
+
+// Загрузка списка активных сервисов
+async function loadServices() {
+    const container = document.getElementById('servicesList');
+    container.innerHTML = '<div class="loading-message">Загрузка...</div>';
+            
+    try {
+        const response = await fetch('/discovery/services');
+        const services = await response.json();
+                
+        if (!services || services.length === 0) {
+            container.innerHTML = '<div class="empty-message">📭 Нет активных сервисов</div>';
+            return;
+    }
+                
+    container.innerHTML = services.map(service => `
+                    <div class="service-item">
+                        <div class="service-info">
+                            <div class="service-name">
+                                <span class="service-status"></span>
+                                ${service.service_name || service.service_id || 'Без имени'}
+                            </div>
+                            <div class="service-address">
+                                ${service.address}:${service.port}
+                            </div>
+                        </div>
+                        <div class="service-tags">
+                            ${service.tags?.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('') || '<span class="tag">нет тегов</span>'}
+                        </div>
+                    </div>
+                `).join('');
+                
+    } catch (error) {
+            console.error('Ошибка:', error);
+            container.innerHTML = '<div class="empty-message">Ошибка загрузки</div>';
+    }
+}
+        
+// Загружаем сервисы при открытии страницы
+document.addEventListener('DOMContentLoaded', () => {
+    loadServices();
+    // Обновляем каждые 30 секунд
+    setInterval(loadServices, 30000);
+});

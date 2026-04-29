@@ -437,3 +437,108 @@ footer{
     border-radius: 12px;
     margin: 2px;
 }
+
+
+.services-section {
+    margin: 20px 0;
+}
+
+.services-panel {
+    background: #4f694b;
+    border-radius: 18px;
+    padding: 20px;
+    color: white;
+}
+
+.services-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.services-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.refresh-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 18px;
+    padding: 6px 12px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.refresh-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.services-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.service-item {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.service-info {
+    flex: 1;
+}
+
+.service-name {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.service-address {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 3px;
+}
+
+.service-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.tag {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+}
+
+.service-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #81c784;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 30px;
+    opacity: 0.8;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 30px;
+}
