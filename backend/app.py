@@ -53,6 +53,7 @@ else:
 # Регистрируем blueprint
 app.register_blueprint(discovery_bp)
 
+
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     photo = db.Column(db.String(255), nullable=False) 
@@ -649,6 +650,10 @@ def train():
     return redirect(url_for('model'))
 
 
+
+
+
+
 @app.route('/health')
 def health_check():
     """Health check endpoint"""
@@ -689,7 +694,7 @@ def health_check():
 def register_current_service():
     """Автоматическая регистрация текущего сервиса"""
     service_id = f"flask-backend-{os.getenv('HOSTNAME', 'default')}"
-    service_address = "app"  # Имя сервиса в Docker сети
+    service_address = "app"
     service_port = 5000
     
     tags = ["api", "v1", "web", "analytics"]
@@ -704,12 +709,13 @@ def register_current_service():
             "version": "1.0.0",
             "framework": "flask",
             "python_version": "3.11"
-        }
+        },
+        "ttl": 60
     }
     
     try:
         # Ждем запуска приложения
-        time.sleep(3)
+        time.sleep(5)
         
         # Регистрируемся через внутренний эндпоинт
         response = requests.post(
@@ -720,26 +726,28 @@ def register_current_service():
         
         if response.status_code == 200:
             logger.info(f"Successfully registered with {SERVICE_DISCOVERY_BACKEND}: {service_id}")
+            logger.info(f"   Address: {service_address}:{service_port}")
+            logger.info(f"   Tags: {tags}")
         else:
             logger.error(f"Failed to register: {response.text}")
             
     except Exception as e:
         logger.error(f"Error during service registration: {str(e)}")
 
-# ... (остальной код app.py без изменений) ...
+logger.info("Gunicorn mode: scheduling auto-registration...")
+
+# Запускаем с задержкой, чтобы приложение успело стартовать
+def schedule_registration():
+    logger.info("Waiting 5 seconds before registration...")
+    time.sleep(5)
+    register_current_service()
+
+registration_thread = threading.Thread(target=schedule_registration, daemon=True)
+registration_thread.start()
+logger.info("Auto-registration thread started for Gunicorn")
 
 if __name__ == '__main__':
+    logger.info("Local development mode: starting Flask...")
     with app.app_context():
         db.create_all()
-        
-        # Регистрируем сервис в отдельном потоке
-        registration_thread = threading.Thread(target=register_current_service, daemon=True)
-        registration_thread.start()
-    
     app.run(debug=True, host='0.0.0.0', port=5000)
-
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
