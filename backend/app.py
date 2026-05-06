@@ -17,6 +17,7 @@ import traceback
 import threading
 import time
 import requests
+from flask_cors import CORS
 
 load_dotenv()
 app = Flask(__name__,
@@ -33,6 +34,8 @@ logger = logging.getLogger(__name__)
 
 secret_key = os.urandom(24)
 app.secret_key = secret_key
+
+CORS(app, origins=['http://localhost:8080', 'http://localhost:5173'])
 
 db = SQLAlchemy(app)
 
