@@ -1,445 +1,270 @@
-body{
-  background-color: #F5F5F5;
-  margin: 0;
-  height: 100%;
-  
+/* Базовые стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #F5F5F5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Хедер */
-
-header{
-  background: #FDFEFE;
-  width: 100%;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  
+header {
+    background: #FDFEFE;
+    width: 100%;
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-img.Logo{
+.Logo {
     width: 167px;
     height: 43px;
     margin-left: 50px;
-    
 }
 
-.notification{
-  padding-right: 16px;
+.notification {
+    padding-right: 16px;
 }
 
-img.profile{
-  width: 40px;
-  height: 40px;
-  border-radius: 100%;
-  
+.profile {
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
 }
 
-menu{
-  float: right;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 50px;
+menu {
+    display: flex;
+    align-items: center;
+    margin-right: 50px;
 }
 
-/* Основная часть */
-
-main{
-  margin-left: 50px;
-  margin-right: 50px;
-  padding-bottom: 90px;
-  display: flex;
-  flex-direction: column;
+/* Навигация */
+nav {
+    display: flex;
+    margin: 20px 50px;
+    gap: 18px;
 }
 
-nav{
-  display: flex;
-  margin-top: 20px;
+.btnDownload, .linkStelaz {
+    flex: 1;
+    height: 84px;
+    color: #FDFEFE;
+    background-color: #4f694b;
+    border-radius: 18px;
+    border: none;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 0 30px;
 }
 
-button.btnDownload{
-  width: 100%;
-  height: 84px;
-  color: #FDFEFE;
-  background-color: #4f694b;
-  border-radius: 18px;
-  border: none;
-  text-decoration: none;
-  font-size: 20px;
-  display: flex;
-  align-items: center; 
-  cursor: pointer;
-  padding-left: 30px;
-  padding-right: 30px;
-  justify-content: space-between;
-  
+.btnDownload:hover, .linkStelaz:hover {
+    background-color: #5a6e57;
 }
 
-.btnDownload:hover {
-  background-color: #5a6e57;
+.model {
+    border: none;
+    background: none;
 }
 
-img.imgStelaz{
-  width: 33px;
-  height: 33px;
+.imgModel {
+    padding: 13px 40px;
+    background-color: #4f694b;
+    border-radius: 18px;
+    display: block;
 }
 
-button.linkStelaz{
-  width: 100%;
-  height: 84px;
-  color: #FDFEFE;
-  background-color: #4f694b;
-  border-radius: 18px;
-  border: none;
-  text-decoration: none;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding-left: 30px;
-  padding-right: 30px;
-  justify-content: space-between;
-  margin-right: 18px;
-  margin-left: 18px;
+.imgModel:hover {
+    background-color: #5a6e57;
 }
 
-.linkStelaz:hover {
-  background-color: #5a6e57;
+.imgStelaz, .imgDown {
+    width: 33px;
+    height: 33px;
 }
 
-a{
-  color: #FDFEFE;
+a {
+    color: #FDFEFE;
+    text-decoration: none;
 }
 
-img.imgModel{
-  padding-left: 40px;
-  padding-right: 40px;
-  padding-top: 13px;
-  padding-bottom: 14px;
-  background-color: #4f694b;
-  border-radius: 18px;
-}
-
-button.model{
-  border: none;
-  padding: 0px;
-  margin: 0px;
-}
-
-img.imgDown{
-  height: 33px;
-  width: 33px;
-}
-
-img.imgModel:hover {
-  background-color: #5a6e57;
-}
-
-
-
-/* Экран загрузки */
+/* Модальное окно */
 .LoadingScreen {
-  position: fixed;
-  background-color: #FDFEFE;
-  border: none;
-  display: none;
-  width: 781px;
-  /* height: 433px; */
-            
-
-  
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 1;
-  z-index: 9999;
-  
-  
-  padding: 40px;
-  border-radius: 18px;
-  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); */
-  
-
-
-    
-    /* width:100%;
-    min-height:100%;
-    background-color: rgba(0,0,0,0.5);
-    overflow:hidden;
-    position:fixed;
-    top:0px; */
-    
+    position: fixed;
+    background-color: #FDFEFE;
+    width: 781px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    padding: 40px;
+    border-radius: 18px;
 }
 
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Затемнение с прозрачностью 70% */
-  display: none; /* Скрываем по умолчанию */
-  z-index: 999; /* Устанавливаем на передний план */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
 }
 
-.show {
-  display: block; /* Показываем попап и затемнение */
+.VerhLoadingScreen {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
 }
 
-
-.VerhLoadingScreen{
-  display: flex;
-  justify-content: space-between;
- 
+h3 {
+    font-size: 24px;
 }
 
-h3{
-  padding: 0;
-  margin: 0;
-  font-size: 24px;
+.close-x {
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-.close-x{
-  border: none;
-  text-decoration: none;
-  background-color: #FDFEFE;
-  cursor: pointer;
+.listFiles {
+    min-height: 108px;
+    margin-bottom: 24px;
+    overflow-y: auto;
+    max-height: 500px;
 }
 
-
-.file{
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 300px;
-}
-
-#uploadForm{
-  display: flex;
-  justify-content: center;
-}
-
-.listFiles{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  width: 781px;
-  min-height: 108px;
-  margin-top: 24px;
-  margin-bottom: 24px;
-  overflow-y: auto;
-  max-height: 500px; 
-}
-
-
-
-
-/* Делаем наше поле ввода файла невидимым */
 .custom-file-input {
     opacity: 0;
-    width: 0.1px;
-    height: 0.1px;
-    z-index: -1; /* "Скрываем" поле ввода */
+    width: 0;
+    height: 0;
+    position: absolute;
 }
 
-/* Создаем "подмену" кнопки */
 .file-btn {
-  background-color: #b4b7c5;
-  color: #FDFEFE;
-    
-  border-radius: 18px;
-  cursor: pointer;
-  display: inline-block;
-
-  width: 230px;
-  height: 56px;
-  
-  border: none;
-  text-decoration: none;
-  font-size: 23px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 24px;  
-
+    background-color: #b4b7c5;
+    color: #FDFEFE;
+    border-radius: 18px;
+    cursor: pointer;
+    width: 230px;
+    height: 56px;
+    border: none;
+    font-size: 23px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 24px;
 }
 
-.file-btn:hover{
-  background-color: #5a6e57;
+.file-btn:hover, .downloadBtn2:hover {
+    background-color: #5a6e57;
 }
 
-
-button.downloadBtn2{
-  background-color: #4f694b;
-  color: #FDFEFE;
-  border-radius: 18px;
-  cursor: pointer;
-  display: inline-block;
-
-  width: 230px;
-  height: 56px;
-  
-  border: none;
-  text-decoration: none;
-  font-size: 23px;
-  /* display: flex; */
-  align-items: center;
-  justify-content: center;
- 
-}
-
-.downloadBtn2:hover{
-  background-color: #5a6e57;
+.downloadBtn2 {
+    background-color: #4f694b;
+    color: #FDFEFE;
+    border-radius: 18px;
+    cursor: pointer;
+    width: 230px;
+    height: 56px;
+    border: none;
+    font-size: 23px;
 }
 
 /* Галерея */
-
-.container_gallery{
-  width: 100%;
-  display: block;
-  margin-top: 24px;
+.container_gallery {
+    padding: 0 50px;
+    margin-top: 24px;
 }
-
 
 .gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 15px;
 }
 
-
-.gallery div {
-  background: white;
-  border-radius: 18px;
-  width: 232px;
-  margin-right: 20px;
-  margin-bottom: 20px;
+.gallery > div {
+    background: white;
+    border-radius: 18px;
+    width: 232px;
+    overflow: hidden;
 }
 
 .gallery img {
-  display: block;
-  width: 100%;
-  height: 300px;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    cursor: pointer;
 }
 
-h3.name{
-  padding: 30px;
-  font-size: 20px;
+.name {
+    text-align: center;
+    padding: 15px;
+    font-size: 16px;
 }
 
-/* Увеличенное фото */
+.badge {
+    display: block;
+    text-align: center;
+    background: #4f694b;
+    color: white;
+    padding: 8px;
+}
 
+.processing-placeholder {
+    background: #e0e0e0;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+}
+
+/* Зум */
 .zoomed {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
 }
 
 .zoomed img {
-  max-width: 90%;
-  max-height: 90%;
-}
- 
-#shelfInfo {
-  color: white;
-  margin: 10px 0;
-}
-  
-#deleteButton {
-  padding: 10px 20px; 
-  background-color: red; 
-  color: white; 
-  border: none;
-  cursor: pointer;
+    max-width: 90%;
+    max-height: 80%;
 }
 
-
-
-
-
-
-
-
-/* Футер */
-
-footer{
-    background: #FDFEFE;
-    width: 100%;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 80;
-}
-
-
-
-
-
-
-.redis-stats {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
-    padding: 20px;
-    margin: 20px;
+.shelfInfo {
     color: white;
+    margin: 15px;
+    font-size: 18px;
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.stat-card {
-    background: rgba(255, 255, 255, 0.2);
+.zoomed button {
+    padding: 10px 20px;
+    background: red;
+    color: white;
+    border: none;
     border-radius: 8px;
-    padding: 15px;
-    text-align: center;
+    cursor: pointer;
 }
 
-.stat-value {
-    font-size: 32px;
-    font-weight: bold;
-}
-
-.stat-label {
-    font-size: 12px;
-    margin-top: 5px;
-    opacity: 0.9;
-}
-
-.tag-cloud {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 12px;
-}
-
-.tag {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin: 2px;
-}
-
-
+/* Сервисы */
 .services-section {
+    padding: 0 50px;
     margin: 20px 0;
 }
 
@@ -454,14 +279,7 @@ footer{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.services-header h3 {
-    margin: 0;
-    font-size: 20px;
+    margin-bottom: 20px;
 }
 
 .refresh-btn {
@@ -471,37 +289,38 @@ footer{
     padding: 6px 12px;
     color: white;
     cursor: pointer;
-    font-size: 12px;
-}
-
-.refresh-btn:hover {
-    background: rgba(255,255,255,0.3);
-}
-
-.services-list {
-    max-height: 300px;
-    overflow-y: auto;
 }
 
 .service-item {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.15);
     border-radius: 12px;
-    padding: 10px 15px;
+    padding: 12px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
-}
-
-.service-info {
-    flex: 1;
 }
 
 .service-name {
     font-weight: bold;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.service-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #81c784;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
 }
 
 .service-address {
@@ -510,35 +329,138 @@ footer{
     margin-top: 3px;
 }
 
-.service-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
 .tag {
     background: rgba(255,255,255,0.2);
     padding: 2px 8px;
     border-radius: 12px;
     font-size: 10px;
-}
-
-.service-status {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #81c784;
+    margin: 2px;
     display: inline-block;
-    margin-right: 8px;
 }
 
-.empty-message {
+.loading-message, .empty-message {
     text-align: center;
     padding: 30px;
-    opacity: 0.8;
 }
 
-.loading-message {
+
+/* Страница модели */
+.model-page {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.left, .right {
+    flex: 1;
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.blockOne, .blockTwo, .BlockAddClass {
+    margin-bottom: 30px;
+}
+
+.blockOne h2, .blockTwo h2, .BlockAddClass h2 {
+    color: #4f694b;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.parOne, .parTwo, .parTwoClass, .parTwoPhoto {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.btnStartTrain, .btnAddClass, .btnAddDataSet, .btnBack {
+    background-color: #4f694b;
+    color: white;
+    border: none;
+    border-radius: 18px;
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btnStartTrain:hover, .btnAddClass:hover, .btnAddDataSet:hover, .btnBack:hover {
+    background-color: #5a6e57;
+}
+
+.btnBack {
+    background-color: #b4b7c5;
+    margin-bottom: 20px;
+    text-decoration: none;
+    display: inline-block;
     text-align: center;
-    padding: 30px;
+}
+
+.btnBack a {
+    color: white;
+    text-decoration: none;
+}
+
+.addPhoto {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.addPhoto .parTwoPhoto {
+    flex: 1;
+}
+
+.addPhoto .btnDownload {
+    width: auto;
+    padding: 12px 20px;
+    margin: 0;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.fileList {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.inputsval1 {
+    margin-bottom: 10px;
+}
+
+.inputsval {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+select[size="20"] {
+    height: 200px;
+}
+
+/* Адаптивность */
+@media (max-width: 900px) {
+    .model-page {
+        flex-direction: column;
+    }
 }

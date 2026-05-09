@@ -65,13 +65,13 @@ services:
     volumes:
       - ./backend:/app/backend
       - ./frontend/static:/app/static
-      - ./frontend/templates:/app/templates
+      #- ./frontend/templates:/app/templates
       - ./uploads:/app/uploads
       - ./datasets:/app/datasets
       - ./runs:/app/runs
 
   frontend:
-    build: ./frontend-vue
+    build: ./frontend
     container_name: vue_frontend
     restart: unless-stopped
     ports:
