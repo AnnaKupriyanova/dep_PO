@@ -105,6 +105,37 @@ const IndexPage = {
                         </div>
                     </div>
                 </div>
+
+                <!-- Статистика сенсоров -->
+                <div class="sensor-stats-panel">
+                    <div class="services-panel">
+                        <div class="services-header">
+                            <h3>Мониторинг сеянцев</h3>
+                            <button class="refresh-btn" @click="loadSensorStats" :disabled="sensorLoading">
+                                {{ sensorLoading ? '' : '' }} Обновить
+                            </button>
+                        </div>
+                        <div v-if="sensorLoading" class="loading-message">Загрузка данных...</div>
+                        <div v-else class="sensor-grid">
+                            <div class="sensor-card">
+                                <div class="sensor-value">{{ sensorStats.temperature }}°C</div>
+                                <div class="sensor-label">Температура</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-value">{{ sensorStats.humidity }}%</div>
+                                <div class="sensor-label">Влажность</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-value">{{ sensorStats.light }} lux</div>
+                                <div class="sensor-label">Освещение</div>
+                            </div>
+                            <div class="sensor-card">
+                                <div class="sensor-value">{{ sensorStats.readings }}</div>
+                                <div class="sensor-label">Данных за час</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     `,
@@ -118,6 +149,13 @@ const IndexPage = {
         const fileNames = ref('Нет загружаемых файлов')
         const services = ref([])
         const servicesLoading = ref(true)
+        const sensorStats = ref({
+            temperature: 0,
+            humidity: 0,
+            light: 0,
+            readings: 0
+        })
+        const sensorLoading = ref(true)
 
         const loadServices = async () => {
             servicesLoading.value = true
@@ -137,6 +175,24 @@ const IndexPage = {
                 photos.value = await response.json()
             } catch (error) {
                 console.error('Ошибка загрузки фото:', error)
+            }
+        }
+
+        const loadSensorStats = async () => {
+            sensorLoading.value = true
+            try {
+                const response = await fetch('/api/v1/sensors/stats')
+                const stats = await response.json()
+                sensorStats.value = {
+                    temperature: stats.average_temperature || 0,
+                    humidity: stats.average_humidity || 0,
+                    light: stats.average_light_level || 0,
+                    readings: stats.readings_last_hour || 0
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки статистики сенсоров:', error)
+            } finally {
+                sensorLoading.value = false
             }
         }
 
@@ -191,7 +247,6 @@ const IndexPage = {
                     closeUploadModal()
                     await loadPhotos()
                     alert('Файлы успешно загружены!')
-                    // Очищаем поле файлов
                     files.value = []
                     fileNames.value = 'Нет загружаемых файлов'
                     const fileInput = document.getElementById('showUploadForm')
@@ -233,7 +288,9 @@ const IndexPage = {
         onMounted(() => {
             loadPhotos()
             loadServices()
+            loadSensorStats()
             setInterval(loadServices, 30000)
+            setInterval(loadSensorStats, 10000)
         })
 
         return {
@@ -245,6 +302,8 @@ const IndexPage = {
             fileNames,
             services,
             servicesLoading,
+            sensorStats,
+            sensorLoading,
             formatDate,
             goToModel,
             openUploadModal,
@@ -254,7 +313,8 @@ const IndexPage = {
             openZoom,
             closeZoom,
             deleteImage,
-            loadServices
+            loadServices,
+            loadSensorStats
         }
     }
 }
@@ -425,7 +485,6 @@ const ModelPage = {
         }
 
         const updateImage = () => {
-            // Обновляем выбранное изображение
             emit('image-selected', selectedPhoto.value)
         }
 
@@ -598,11 +657,9 @@ const ModelPage = {
 createApp({
     setup() {
         const currentPage = ref('index')
-
         const navigate = (page) => {
             currentPage.value = page
         }
-
         return { currentPage, navigate }
     },
     components: { IndexPage, ModelPage },

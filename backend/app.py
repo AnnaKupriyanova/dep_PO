@@ -18,6 +18,7 @@ import threading
 import time
 import requests
 from flask_cors import CORS
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 load_dotenv()
 app = Flask(__name__,
@@ -74,8 +75,70 @@ class Model(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     model = db.Column(db.String(255), nullable=False)
 
+class SensorData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sensor_id = db.Column(db.String(100), nullable=False)
+    temperature = db.Column(db.Float)
+    humidity = db.Column(db.Float)
+    light_level = db.Column(db.Integer)
+    rack_id = db.Column(db.Integer)
+    shelf_id = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
 with app.app_context():
     db.create_all()
+
+
+@app.route('/api/v1/sensors/data', methods=['POST'])
+def receive_sensor_data():
+    """Приём данных от генератора"""
+    try:
+        data = request.json
+        
+        sensor_reading = SensorData(
+            sensor_id=data.get('sensor_id'),
+            temperature=data.get('temperature'),
+            humidity=data.get('humidity'),
+            light_level=data.get('light_level'),
+            rack_id=data.get('location', {}).get('rack_id'),
+            shelf_id=data.get('location', {}).get('shelf_id'),
+            timestamp=datetime.fromisoformat(data.get('timestamp'))
+        )
+        db.session.add(sensor_reading)
+        db.session.commit()
+        
+        return jsonify({"status": "success", "id": sensor_reading.id}), 201
+        
+    except Exception as e:
+        logger.error(f"Error receiving sensor data: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/v1/sensors/stats', methods=['GET'])
+def get_sensor_stats():
+    """Получить статистику сенсоров"""
+    try:
+        # Средние показатели за последний час
+        from sqlalchemy import func
+        
+        hour_ago = datetime.utcnow() - timedelta(hours=1)
+        
+        stats = db.session.query(
+            func.avg(SensorData.temperature).label('avg_temp'),
+            func.avg(SensorData.humidity).label('avg_humidity'),
+            func.avg(SensorData.light_level).label('avg_light'),
+            func.count(SensorData.id).label('total_readings')
+        ).filter(SensorData.timestamp >= hour_ago).first()
+        
+        return jsonify({
+            "average_temperature": round(stats.avg_temp, 2) if stats.avg_temp else 0,
+            "average_humidity": round(stats.avg_humidity, 2) if stats.avg_humidity else 0,
+            "average_light_level": int(stats.avg_light) if stats.avg_light else 0,
+            "readings_last_hour": stats.total_readings or 0
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting sensor stats: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 def get_video_filename(video_path):
@@ -136,7 +199,6 @@ def index():
         logger.error(traceback.format_exc())
         return f"Error: {str(e)}", 500
 
-@app.route('/upload', methods=['POST'])
 def upload_files():
     if 'files' not in request.files:
         return "No file part", 400
@@ -146,10 +208,16 @@ def upload_files():
         
         backend_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(backend_dir)
-        static_dir = os.path.join(project_root, 'frontend', 'static')
+        
+        # В Docker статика в /app/static
+        if os.path.exists('/app/static'):
+            static_dir = '/app/static'
+        else:
+            static_dir = os.path.join(project_root, 'frontend', 'static')
         
         base_images_dir = os.path.join(static_dir, "base_images")
         os.makedirs(base_images_dir, exist_ok=True)
+        print(f"Saving files to: {base_images_dir}")
         
         saved_count = 0
         
@@ -202,20 +270,45 @@ def run_yolo_predictions():
     try:
         backend_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.dirname(backend_dir)
-        static_dir = os.path.join(project_root, 'frontend', 'static')
-        
+
+        # В Docker статика монтируется в /app/static
+        # В локальной разработке - ищем относительно проекта
+        if os.path.exists('/app/static'):
+            static_dir = '/app/static'
+            print(f"Using Docker static dir: {static_dir}")
+        else:
+            static_dir = os.path.join(project_root, 'frontend', 'static')
+            print(f"Using local static dir: {static_dir}")
+
         model_path = os.path.join(static_dir, "best.pt")
+        print(f"Looking for model at: {model_path}")
+        print(f"Model exists: {os.path.exists(model_path)}")
         
         if not os.path.exists(model_path):
             print(f"Model not found at {model_path}")
-            return
+            # Попробуем поискать в других местах
+            alt_paths = [
+                '/app/static/best.pt',
+                'static/best.pt',
+                os.path.join(backend_dir, 'static', 'best.pt'),
+            ]
+            for alt in alt_paths:
+                if os.path.exists(alt):
+                    model_path = alt
+                    print(f"Found model at alternative path: {model_path}")
+                    break
+            else:
+                print("No model found anywhere!")
+                return
         
+        print(f"Loading model from: {model_path}")
         model = YOLO(model_path)
+        print("Model loaded successfully")
         
-        # Берем фото без processed_photo (новые или необработанные)
+        # Берем фото без processed_photo
         photos = Photo.query.filter(
             Photo.modul == 0,
-            Photo.processed_photo.is_(None)  # Только необработанные
+            Photo.processed_photo.is_(None)
         ).all()
         
         if not photos:
@@ -231,13 +324,18 @@ def run_yolo_predictions():
         # Копируем фото во временную папку
         for photo in photos:
             source_path = os.path.join(static_dir, photo.photo)
+            print(f"Source path: {source_path}")
             if os.path.exists(source_path):
                 dest_path = os.path.join(temp_predict_folder, os.path.basename(photo.photo))
                 shutil.copy2(source_path, dest_path)
                 print(f"Copied: {os.path.basename(photo.photo)}")
+            else:
+                print(f"Source not found: {source_path}")
         
         # Выполняем предсказание
+        print("Running YOLO predict...")
         results = model.predict(temp_predict_folder, save=True)
+        print(f"Results: {len(results)} images processed")
         
         # Папка с результатами YOLO
         yolo_output_folder = os.path.join(backend_dir, "runs", "detect", "predict")
@@ -248,7 +346,6 @@ def run_yolo_predictions():
         
         # Обрабатываем результаты
         for photo in photos:
-            # Ищем результат для текущего фото
             result_for_photo = None
             for result in results:
                 if os.path.basename(result.path) == os.path.basename(photo.photo):
@@ -256,40 +353,28 @@ def run_yolo_predictions():
                     break
             
             if result_for_photo:
-                # Проверяем наличие повреждений
                 damage_detected = False
                 if result_for_photo.boxes is not None and len(result_for_photo.boxes) > 0:
                     for box in result_for_photo.boxes:
                         class_id = int(box.cls)
                         label = result_for_photo.names[class_id]
                         print(f"Detected: {label} in {photo.photo}")
-                        if label == 'Empty':  # Ваша метка для пустых/поврежденных мест
+                        if label == 'Empty':
                             damage_detected = True
                             break
                 
                 if damage_detected:
                     photo.is_discovered = 1
-                    
-                    # Копируем обработанное изображение
                     yolo_output_path = os.path.join(yolo_output_folder, os.path.basename(photo.photo))
                     if os.path.exists(yolo_output_path):
                         dest_path = os.path.join(processed_images_dir, os.path.basename(photo.photo))
                         shutil.copy2(yolo_output_path, dest_path)
-                        
-                        # Сохраняем относительный путь
                         relative_processed = os.path.relpath(dest_path, static_dir)
                         relative_processed = relative_processed.replace("\\", "/")
                         photo.processed_photo = relative_processed
                         print(f"Saved processed image: {relative_processed}")
-                    else:
-                        print(f"YOLO output not found: {yolo_output_path}")
                 else:
                     photo.is_discovered = 0
-                    # Создаем запись что фото обработано, но повреждений нет
-                    # Можно скопировать оригинал как processed_photo или оставить None
-                    print(f"No damage detected in {photo.photo}")
-                    
-                    # Опционально: копируем оригинал как processed_photo
                     source_path = os.path.join(static_dir, photo.photo)
                     if os.path.exists(source_path):
                         dest_path = os.path.join(processed_images_dir, f"no_damage_{os.path.basename(photo.photo)}")
@@ -297,6 +382,7 @@ def run_yolo_predictions():
                         relative_processed = os.path.relpath(dest_path, static_dir)
                         relative_processed = relative_processed.replace("\\", "/")
                         photo.processed_photo = relative_processed
+                        print(f"No damage detected, saved original as: {relative_processed}")
             else:
                 print(f"No result found for {photo.photo}")
         
@@ -312,7 +398,8 @@ def run_yolo_predictions():
         
     except Exception as e:
         print(f"Error in run_yolo_predictions: {str(e)}")
-        print(traceback.format_exc())
+        import traceback
+        traceback.print_exc()
         db.session.rollback()
 
 
@@ -741,8 +828,8 @@ logger.info("Gunicorn mode: scheduling auto-registration...")
 
 # Запускаем с задержкой, чтобы приложение успело стартовать
 def schedule_registration():
-    logger.info("Waiting 5 seconds before registration...")
-    time.sleep(5)
+    logger.info("Waiting 15 seconds before registration...")
+    time.sleep(15)
     register_current_service()
 
 registration_thread = threading.Thread(target=schedule_registration, daemon=True)

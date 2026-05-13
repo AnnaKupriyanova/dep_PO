@@ -81,6 +81,25 @@ services:
     networks:
       - app-network
 
+
+  generator:
+    build: ./generator-service
+    container_name: generator_service
+    restart: unless-stopped
+    environment:
+      - BACKEND_URL=http://app:5000
+      - HOSTNAME=generator-1
+    depends_on:
+      - app
+      - redis
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   mysql_data:
   redis_data:
