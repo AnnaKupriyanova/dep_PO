@@ -22,3 +22,14 @@ CREATE TABLE model (
     id INTEGER AUTO_INCREMENT PRIMARY KEY,
     model VARCHAR(255) NOT NULL
 );
+USE trees; 
+CREATE TABLE sensor_data (
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
+    sensor_id VARCHAR(100) NOT NULL,
+    temperature FLOAT,
+    humidity FLOAT,
+    light_level INTEGER,
+    rack_id INTEGER,
+    shelf_id INTEGER,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);

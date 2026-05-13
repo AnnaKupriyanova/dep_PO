@@ -3,7 +3,7 @@ import torch
 import shutil
 import cv2
 import mimetypes
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -119,6 +119,7 @@ def get_sensor_stats():
     try:
         # Средние показатели за последний час
         from sqlalchemy import func
+        from datetime import datetime, timedelta
         
         hour_ago = datetime.utcnow() - timedelta(hours=1)
         

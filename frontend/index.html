@@ -12,5 +12,53 @@
     <!-- Vue из CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/static/js/script.js"></script>
+
+    <!-- временное решение -->
+    <div class="sensor-stats-panel" id="sensor-stats-panel" style="margin-top: 20px; padding: 0 50px;">
+        <div class="services-panel">
+            <div class="services-header">
+                <h3>Мониторинг сеянцев</h3>
+                <button class="refresh-btn" onclick="loadSensorStatsManual()">Обновить</button>
+            </div>
+            <div class="sensor-grid">
+                <div class="sensor-card">
+                    <div class="sensor-value" id="temp-value">0°C</div>
+                    <div class="sensor-label">Температура</div>
+                </div>
+                <div class="sensor-card">
+                    <div class="sensor-value" id="humidity-value">0%</div>
+                    <div class="sensor-label">Влажность</div>
+                </div>
+                <div class="sensor-card">
+                    <div class="sensor-value" id="light-value">0 lux</div>
+                    <div class="sensor-label">Освещение</div>
+                </div>
+                <div class="sensor-card">
+                    <div class="sensor-value" id="readings-value">0</div>
+                    <div class="sensor-label">Данных за час</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function loadSensorStatsManual() {
+        try {
+            const response = await fetch('/api/v1/sensors/stats')
+            const stats = await response.json()
+            document.getElementById('temp-value').innerText = stats.average_temperature + '°C'
+            document.getElementById('humidity-value').innerText = stats.average_humidity + '%'
+            document.getElementById('light-value').innerText = stats.average_light_level + ' lux'
+            document.getElementById('readings-value').innerText = stats.readings_last_hour
+            console.log('Данные обновлены:', stats)
+        } catch (error) {
+            console.error('Ошибка загрузки:', error)
+        }
+    }
+    
+    loadSensorStatsManual()
+    
+    setInterval(loadSensorStatsManual, 10000)
+    </script>
 </body>
 </html>
